@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人生兩階段資產轉化試算器</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-50 p-6 text-slate-800">
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md border border-slate-200">
+    <h1 class="text-2xl font-bold mb-2 text-indigo-900">人生資產累積與退休現金流試算器</h1>
+    <p class="text-slate-500 mb-6">隨時調整衝刺期與退休期參數，即時試算總資產與月領配息。</p>
+
+    <!-- 控制區塊 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-slate-100 p-4 rounded-lg">
+      <div>
+        <label class="block font-medium mb-1">初始投入本金 (NT$): <span id="initVal" class="font-bold text-indigo-600">500,000</span></label>
+        <input type="range" id="initial" min="100000" max="2000000" step="50000" value="500000" class="w-full">
+      </div>
+      <div>
+        <label class="block font-medium mb-1">每月定期定額 (NT$): <span id="monthlyVal" class="font-bold text-indigo-600">20,000</span></label>
+        <input type="range" id="monthly" min="5000" max="100000" step="1000" value="20000" class="w-full">
+      </div>
+      <div>
+        <label class="block font-medium mb-1">衝刺期年化報酬率 (%): <span id="rateVal" class="font-bold text-indigo-600">8%</span></label>
+        <input type="range" id="rate" min="3" max="15" step="0.5" value="8" class="w-full">
+      </div>
+      <div>
+        <label class="block font-medium mb-1">退休轉化殖利率 (%): <span id="yieldVal" class="font-bold text-indigo-600">5%</span></label>
+        <input type="range" id="yield" min="3" max="10" step="0.5" value="5" class="w-full">
+      </div>
+    </div>
+
+    <!-- 數據結果卡片 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+        <div class="text-sm text-indigo-600 font-medium">20 年後預估累積總資產</div>
+        <div id="totalAsset" class="text-2xl font-extrabold text-indigo-900">NT$ 0</div>
+      </div>
+      <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+        <div class="text-sm text-emerald-600 font-medium">退休後預估每月現金流</div>
+        <div id="monthlyFlow" class="text-2xl font-extrabold text-emerald-800">NT$ 0</div>
+      </div>
+    </div>
+
+    <!-- 視覺圖表 -->
+    <div class="relative h-64">
+      <canvas id="myChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('myChart').getContext('2d');
+    let myChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [{ label: '資產累積成長 (NT$)', data: [], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    function calculate() {
+      const init = parseFloat(document.getElementById('initial').value);
+      const monthly = parseFloat(document.getElementById('monthly').value);
+      const rate = parseFloat(document.getElementById('rate').value) / 100 / 12;
+      const retireYield = parseFloat(document.getElementById('yield').value) / 100;
+
+      document.getElementById('initVal').innerText = init.toLocaleString();
+      document.getElementById('monthlyVal').innerText = monthly.toLocaleString();
+      document.getElementById('rateVal').innerText = (rate * 12 * 100).toFixed(1) + '%';
+      document.getElementById('yieldVal').innerText = (retireYield * 100).toFixed(1) + '%';
+
+      let labels = [], data = [];
+      let currentVal = init;
+
+      for (let t = 0; t <= 20; t++) {
+        labels.push('第 ' + t + ' 年');
+        if (t === 0) {
+          data.push(init);
+        } else {
+          for (let m = 0; m < 12; m++) {
+            currentVal = currentVal * (1 + rate) + monthly;
+          }
+          data.push(Math.round(currentVal));
+        }
+      }
+
+      const finalAsset = data[data.length - 1];
+      const monthlyCash = Math.round((finalAsset * retireYield) / 12);
+
+      document.getElementById('totalAsset').innerText = 'NT$ ' + finalAsset.toLocaleString();
+      document.getElementById('monthlyFlow').innerText = 'NT$ ' + monthlyCash.toLocaleString();
+
+      myChart.data.labels = labels;
+      myChart.data.datasets[0].data = data;
+      myChart.update();
+    }
+
+    document.querySelectorAll('input').forEach(input => input.addEventListener('input', calculate));
+    calculate();
+  </script>
+</body>
+</html>
