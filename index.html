@@ -12,7 +12,7 @@
     <!-- 頁頭標題 -->
     <div class="border-b pb-4 mb-6">
       <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-950">客製化收支出推算系統-中和小陳設計</h1>
-      <p class="text-slate-500 text-sm mt-1">獨立列出每月結餘、房貸寬限期動態金流、每年總支出與資產增幅比例明細。</p>
+      <p class="text-slate-500 text-sm mt-1">獨立列出每月結餘、房貸寬限期動態金流、多元資產個別配置與資產增幅明細。</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -95,47 +95,91 @@
           </div>
         </div>
 
-        <!-- 5. 投資策略與選擇 -->
+        <!-- 5. 多元資產配置細項 -->
         <div>
-          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">5. 投資策略與工具</h3>
+          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">5. 多元資產配置設定</h3>
           <div class="space-y-3">
             
-            <!-- 新增投資工具選擇 -->
-            <div>
-              <label class="block font-medium mb-1">理財/投資工具選擇：</label>
-              <select id="investStrategy" class="w-full p-1.5 border rounded bg-white font-medium text-indigo-900">
-                <option value="none">無特別投資（純現金/活存）</option>
-                <option value="deposit">銀行定存 (約 1.7%)</option>
-                <option value="fund" selected>基金 / ETF / 股市投資 (自訂報酬率)</option>
-              </select>
+            <div class="p-2 bg-indigo-50/60 rounded-lg border border-indigo-100 flex items-center justify-between">
+              <span class="font-bold text-indigo-900">啟用每月定期定額投入：</span>
+              <input type="checkbox" id="enableMonthlyInvest" class="w-4 h-4 text-indigo-600 rounded">
             </div>
 
-            <div>
-              <label class="block font-medium">現有投資/存款本金 (NT$)：</label>
-              <input type="number" id="initialCapital" value="500000" step="50000" class="w-full p-1.5 border rounded">
-            </div>
-
-            <!-- 定期定額開關與自訂 -->
-            <div class="p-2.5 bg-indigo-50/60 rounded-lg border border-indigo-100 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-indigo-900">投入每月盈餘/定期定額：</span>
-                <input type="checkbox" id="enableMonthlyInvest" class="w-4 h-4 text-indigo-600 rounded">
-              </div>
-              <p class="text-[11px] text-slate-500">預設取消（不自動投入）。勾選後可設定每月自訂投入金額。</p>
-              
-              <div id="investAmountContainer" class="hidden pt-1">
-                <label class="block font-medium text-slate-700">每月定期定額金額 (NT$)：</label>
-                <input type="number" id="customMonthlyInvest" value="10000" step="1000" class="w-full p-1.5 border rounded bg-white">
+            <!-- 資產 1: 現金/活存 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1.5">
+              <span class="font-bold text-slate-700 block">💵 現金 / 活存</span>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-500">既有本金(NT$)</label>
+                  <input type="number" id="capCash" value="100000" step="10000" class="w-full p-1 border rounded text-xs">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500">每月投入(NT$)</label>
+                  <input type="number" id="invCash" value="2000" step="1000" class="w-full p-1 border rounded text-xs">
+                </div>
               </div>
             </div>
 
-            <div id="rateSliderBlock">
-              <label class="block font-medium">衝刺期預估年化報酬率：<span id="investRateVal" class="font-bold text-indigo-600">8.0%</span></label>
-              <input type="range" id="investRate" min="0" max="20" step="0.5" value="8" class="w-full">
+            <!-- 資產 2: 銀行定存 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1.5">
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-blue-900">🏦 銀行定存</span>
+                <span class="text-[10px] text-blue-600 font-semibold">報酬率: <span id="rateDepositVal">1.7</span>%</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-500">既有本金(NT$)</label>
+                  <input type="number" id="capDeposit" value="200000" step="50000" class="w-full p-1 border rounded text-xs">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500">每月投入(NT$)</label>
+                  <input type="number" id="invDeposit" value="3000" step="1000" class="w-full p-1 border rounded text-xs">
+                </div>
+              </div>
+              <input type="range" id="rateDeposit" min="0" max="5" step="0.1" value="1.7" class="w-full h-1">
             </div>
-            
+
+            <!-- 資產 3: 基金 / ETF -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1.5">
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-emerald-900">📊 基金 / ETF</span>
+                <span class="text-[10px] text-emerald-600 font-semibold">報酬率: <span id="rateFundVal">6.0</span>%</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-500">既有本金(NT$)</label>
+                  <input type="number" id="capFund" value="100000" step="10000" class="w-full p-1 border rounded text-xs">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500">每月投入(NT$)</label>
+                  <input type="number" id="invFund" value="3000" step="1000" class="w-full p-1 border rounded text-xs">
+                </div>
+              </div>
+              <input type="range" id="rateFund" min="0" max="15" step="0.5" value="6.0" class="w-full h-1">
+            </div>
+
+            <!-- 資產 4: 股票 / 個股 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1.5">
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-purple-900">📈 股票 / 個股</span>
+                <span class="text-[10px] text-purple-600 font-semibold">報酬率: <span id="rateStockVal">9.0</span>%</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-500">既有本金(NT$)</label>
+                  <input type="number" id="capStock" value="100000" step="10000" class="w-full p-1 border rounded text-xs">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500">每月投入(NT$)</label>
+                  <input type="number" id="invStock" value="2000" step="1000" class="w-full p-1 border rounded text-xs">
+                </div>
+              </div>
+              <input type="range" id="rateStock" min="0" max="25" step="0.5" value="9.0" class="w-full h-1">
+            </div>
+
+            <!-- 退休殖利率設定 -->
             <div>
-              <label class="block font-medium">退休轉化殖利率：<span id="retireYieldVal" class="font-bold text-indigo-600">5.0%</span></label>
+              <label class="block font-medium">退休轉化整體殖利率：<span id="retireYieldVal" class="font-bold text-indigo-600">5.0%</span></label>
               <input type="range" id="retireYield" min="0" max="15" step="0.5" value="5" class="w-full">
             </div>
           </div>
@@ -189,7 +233,7 @@
         <div class="bg-white p-4 border rounded-xl shadow-sm overflow-hidden">
           <h4 class="text-xs font-bold text-indigo-950 mb-3 flex items-center gap-1">
             <span>📋 逐年資金變化詳細計算表</span>
-            <span class="text-[10px] font-normal text-slate-400">（含每年總支出與資產年度增幅 %）</span>
+            <span class="text-[10px] font-normal text-slate-400">（多軌資產獨立複利計算）</span>
           </h4>
           <div class="overflow-x-auto max-h-80">
             <table class="w-full text-left text-xs border-collapse">
@@ -241,30 +285,7 @@
     });
 
     const enableCheckbox = document.getElementById('enableMonthlyInvest');
-    const investContainer = document.getElementById('investAmountContainer');
-    const strategySelect = document.getElementById('investStrategy');
-    const rateInput = document.getElementById('investRate');
-
-    // 選擇投資策略後的拉桿切換
-    strategySelect.addEventListener('change', function() {
-      if (this.value === 'none') {
-        rateInput.value = 0;
-      } else if (this.value === 'deposit') {
-        rateInput.value = 1.7;
-      } else if (this.value === 'fund') {
-        rateInput.value = 8.0;
-      }
-      calculate();
-    });
-
-    enableCheckbox.addEventListener('change', function() {
-      if (this.checked) {
-        investContainer.classList.remove('hidden');
-      } else {
-        investContainer.classList.add('hidden');
-      }
-      calculate();
-    });
+    enableCheckbox.addEventListener('change', calculate);
 
     function calculate() {
       const curAge = parseInt(document.getElementById('currentAge').value);
@@ -281,27 +302,43 @@
       const gracePmt = parseFloat(document.getElementById('gracePmt').value) || 0;
 
       const carLoanPmt = parseFloat(document.getElementById('carLoanPmt').value) || 0;
-      
-      const initialCapital = parseFloat(document.getElementById('initialCapital').value) || 0;
-      const investRate = parseFloat(document.getElementById('investRate').value) / 100 / 12;
       const retireYield = parseFloat(document.getElementById('retireYield').value) / 100;
-
       const isInvestEnabled = enableCheckbox.checked;
-      const customInvestVal = parseFloat(document.getElementById('customMonthlyInvest').value) || 0;
 
-      // 更新介面數值
+      // 讀取四種資產設定
+      const capCash = parseFloat(document.getElementById('capCash').value) || 0;
+      const invCash = parseFloat(document.getElementById('invCash').value) || 0;
+
+      const capDeposit = parseFloat(document.getElementById('capDeposit').value) || 0;
+      const invDeposit = parseFloat(document.getElementById('invDeposit').value) || 0;
+      const rateDeposit = parseFloat(document.getElementById('rateDeposit').value) / 100 / 12;
+
+      const capFund = parseFloat(document.getElementById('capFund').value) || 0;
+      const invFund = parseFloat(document.getElementById('invFund').value) || 0;
+      const rateFund = parseFloat(document.getElementById('rateFund').value) / 100 / 12;
+
+      const capStock = parseFloat(document.getElementById('capStock').value) || 0;
+      const invStock = parseFloat(document.getElementById('invStock').value) || 0;
+      const rateStock = parseFloat(document.getElementById('rateStock').value) / 100 / 12;
+
+      // 更新介面顯示標籤
       document.getElementById('currentAgeVal').innerText = curAge;
       document.getElementById('retireAgeVal').innerText = retAge;
       document.getElementById('mortgageYearsVal').innerText = mortgageYears;
       document.getElementById('graceYearsVal').innerText = graceYears;
-      document.getElementById('investRateVal').innerText = (investRate * 12 * 100).toFixed(1) + '%';
+      document.getElementById('rateDepositVal').innerText = (rateDeposit * 12 * 100).toFixed(1);
+      document.getElementById('rateFundVal').innerText = (rateFund * 12 * 100).toFixed(1);
+      document.getElementById('rateStockVal').innerText = (rateStock * 12 * 100).toFixed(1);
       document.getElementById('retireYieldVal').innerText = (retireYield * 100).toFixed(1) + '%';
 
-      // 第一年房貸判定 (是否有寬限期)
+      // 總初始本金
+      const totalInitialCapital = capCash + capDeposit + capFund + capStock;
+      const totalMonthlyInvest = invCash + invDeposit + invFund + invStock;
+
+      // 第一年房貸與收支狀況
       let initialMortgagePmt = (graceYears > 0 && mortgageYears > 0) ? gracePmt : (mortgageYears > 0 ? mortgagePmt : 0);
       const initialSurplus = salary - monthlyExpenses - monthlyInsurance - monthlyOthers - initialMortgagePmt - carLoanPmt;
 
-      // 畫面明細更新
       document.getElementById('detailSalary').innerText = 'NT$ ' + salary.toLocaleString();
       document.getElementById('detailLiving').innerText = 'NT$ ' + monthlyExpenses.toLocaleString();
       document.getElementById('detailInsurance').innerText = 'NT$ ' + monthlyInsurance.toLocaleString();
@@ -310,31 +347,32 @@
       document.getElementById('surplusCash').innerText = 'NT$ ' + initialSurplus.toLocaleString();
 
       const badge = document.getElementById('investStatusBadge');
-      const strategyText = strategySelect.options[strategySelect.selectedIndex].text;
-
       if (isInvestEnabled) {
-        badge.innerText = `${strategyText} | 定期定額：NT$ ${customInvestVal.toLocaleString()} /月`;
+        badge.innerText = '已啟用定期定額，每月多元投資總投入：NT$ ' + totalMonthlyInvest.toLocaleString();
         badge.className = 'px-2 py-0.5 rounded text-[10px] bg-indigo-100 text-indigo-700 font-bold';
       } else {
-        badge.innerText = `${strategyText} | 單筆滾存`;
+        badge.innerText = '僅試算現有本金多軌滾存';
         badge.className = 'px-2 py-0.5 rounded text-[10px] bg-slate-200 text-slate-700 font-normal';
       }
 
-      // 逐年計算邏輯
+      // 逐年滾存四軌資產
+      let valCash = capCash;
+      let valDeposit = capDeposit;
+      let valFund = capFund;
+      let valStock = capStock;
+
       let labels = [], data = [];
       let tableRowsHtml = '';
-      let currentVal = initialCapital;
-      let prevVal = initialCapital;
+      let prevTotalAsset = totalInitialCapital;
       const totalYears = (retAge >= curAge) ? (retAge - curAge) : 0;
 
       for (let y = 0; y <= totalYears; y++) {
         const age = curAge + y;
         labels.push(age + '歲');
 
-        // 動態判斷當年度房貸狀況
+        // 當年房貸判定
         let currentMortgagePmt = 0;
         let mortgageNote = "已繳清";
-
         if (y < mortgageYears) {
           if (y < graceYears) {
             currentMortgagePmt = gracePmt;
@@ -345,46 +383,49 @@
           }
         }
 
-        // 當月總支出與每年總支出
         const currentMonthlyTotalExpense = monthlyExpenses + monthlyInsurance + monthlyOthers + currentMortgagePmt + carLoanPmt;
         const currentAnnualTotalExpense = currentMonthlyTotalExpense * 12;
-
-        // 計算當年度每月盈餘
         const currentSurplus = salary - currentMonthlyTotalExpense;
 
         if (y === 0) {
-          data.push(initialCapital);
-          const monthlyYieldEst = Math.round((initialCapital * retireYield) / 12);
+          data.push(totalInitialCapital);
+          const monthlyYieldEst = Math.round((totalInitialCapital * retireYield) / 12);
           tableRowsHtml += `
             <tr class="hover:bg-slate-50">
               <td class="p-2 font-bold text-indigo-900 whitespace-nowrap">${age} 歲 (起點)</td>
               <td class="p-2 whitespace-nowrap">NT$ ${currentMortgagePmt.toLocaleString()} <span class="text-[10px] text-slate-400">(${mortgageNote})</span></td>
               <td class="p-2 font-semibold text-rose-600 whitespace-nowrap">NT$ ${currentAnnualTotalExpense.toLocaleString()}</td>
               <td class="p-2 font-semibold text-amber-800 whitespace-nowrap">NT$ ${currentSurplus.toLocaleString()}</td>
-              <td class="p-2 font-bold text-indigo-600 whitespace-nowrap">NT$ ${Math.round(initialCapital).toLocaleString()}</td>
+              <td class="p-2 font-bold text-indigo-600 whitespace-nowrap">NT$ ${Math.round(totalInitialCapital).toLocaleString()}</td>
               <td class="p-2 text-slate-400 whitespace-nowrap">-</td>
               <td class="p-2 text-emerald-700 whitespace-nowrap">NT$ ${monthlyYieldEst.toLocaleString()} /月</td>
             </tr>
           `;
         } else {
-          let monthlyInvest = isInvestEnabled ? customInvestVal : 0;
+          // 進行 12 個月多軌獨立滾存
+          const mCash = isInvestEnabled ? invCash : 0;
+          const mDeposit = isInvestEnabled ? invDeposit : 0;
+          const mFund = isInvestEnabled ? invFund : 0;
+          const mStock = isInvestEnabled ? invStock : 0;
 
-          // 進行 12 個月複利滾存
           for (let m = 0; m < 12; m++) {
-            currentVal = currentVal * (1 + investRate) + monthlyInvest;
+            valCash = valCash + mCash;
+            valDeposit = valDeposit * (1 + rateDeposit) + mDeposit;
+            valFund = valFund * (1 + rateFund) + mFund;
+            valStock = valStock * (1 + rateStock) + mStock;
           }
 
-          const roundedAsset = Math.round(currentVal);
-          const monthlyYieldEst = Math.round((roundedAsset * retireYield) / 12);
-          
+          const currentTotalAsset = Math.round(valCash + valDeposit + valFund + valStock);
+          const monthlyYieldEst = Math.round((currentTotalAsset * retireYield) / 12);
+
           // 計算資產年度增幅 %
           let growthRateText = "0.0%";
-          if (prevVal > 0) {
-            const growthRate = ((roundedAsset - prevVal) / prevVal) * 100;
+          if (prevTotalAsset > 0) {
+            const growthRate = ((currentTotalAsset - prevTotalAsset) / prevTotalAsset) * 100;
             growthRateText = (growthRate >= 0 ? '+' : '') + growthRate.toFixed(1) + '%';
           }
 
-          data.push(roundedAsset);
+          data.push(currentTotalAsset);
 
           tableRowsHtml += `
             <tr class="hover:bg-slate-50">
@@ -392,13 +433,13 @@
               <td class="p-2 whitespace-nowrap">NT$ ${currentMortgagePmt.toLocaleString()} <span class="text-[10px] text-slate-400">(${mortgageNote})</span></td>
               <td class="p-2 font-semibold text-rose-600 whitespace-nowrap">NT$ ${currentAnnualTotalExpense.toLocaleString()}</td>
               <td class="p-2 font-semibold text-amber-800 whitespace-nowrap">NT$ ${currentSurplus.toLocaleString()}</td>
-              <td class="p-2 font-bold text-indigo-600 whitespace-nowrap">NT$ ${roundedAsset.toLocaleString()}</td>
-              <td class="p-2 font-bold ${roundedAsset >= prevVal ? 'text-emerald-600' : 'text-rose-500'} whitespace-nowrap">${growthRateText}</td>
+              <td class="p-2 font-bold text-indigo-600 whitespace-nowrap">NT$ ${currentTotalAsset.toLocaleString()}</td>
+              <td class="p-2 font-bold ${currentTotalAsset >= prevTotalAsset ? 'text-emerald-600' : 'text-rose-500'} whitespace-nowrap">${growthRateText}</td>
               <td class="p-2 text-emerald-700 font-medium whitespace-nowrap">NT$ ${monthlyYieldEst.toLocaleString()} /月</td>
             </tr>
           `;
 
-          prevVal = roundedAsset;
+          prevTotalAsset = currentTotalAsset;
         }
       }
 
