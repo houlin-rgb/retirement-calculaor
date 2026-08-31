@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>客製化支出與退休資產規劃系統</title>
+  <title>客製化收支與資產規劃系統 (預設不自動投入盈餘)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -11,7 +11,7 @@
   <div class="max-w-5xl mx-auto bg-white p-5 md:p-8 rounded-2xl shadow-xl border border-slate-200">
     <div class="border-b pb-4 mb-6">
       <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-950">個人化收支與退休規劃系統</h1>
-      <p class="text-slate-500 text-sm mt-1">精確設定每月生活費、保費與貸款，算出專屬於你的真正資產成長曲線。</p>
+      <p class="text-slate-500 text-sm mt-1">獨立列出每月結餘，自主掌控「單筆既有本金」與「每月定期定額」投入策略。</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -44,7 +44,7 @@
           </div>
         </div>
 
-        <!-- 3. 每月個人開銷細項（改為月計） -->
+        <!-- 3. 每月個人開銷細項 -->
         <div>
           <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">3. 每月支出細項</h3>
           <div class="space-y-2">
@@ -82,14 +82,30 @@
           </div>
         </div>
 
-        <!-- 5. 投資與退休殖利率 -->
+        <!-- 5. 投資策略與開關 -->
         <div>
-          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">5. 投資成長與退休殖利率</h3>
-          <div class="space-y-2">
+          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">5. 投資策略與定期定額設定</h3>
+          <div class="space-y-3">
             <div>
-              <label class="block font-medium">現有投資本金 (NT$)：</label>
+              <label class="block font-medium">現有投資本金 (單筆) (NT$)：</label>
               <input type="number" id="initialCapital" value="500000" step="50000" class="w-full p-1.5 border rounded">
             </div>
+
+            <!-- 定期定額開關與自訂 -->
+            <div class="p-2.5 bg-indigo-50/60 rounded-lg border border-indigo-100 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-indigo-900">投入每月盈餘/定期定額：</span>
+                <input type="checkbox" id="enableMonthlyInvest" class="w-4 h-4 text-indigo-600 rounded">
+              </div>
+              <p class="text-[11px] text-slate-500">預設取消（不自動投入）。勾選後可設定每月自訂投入金額。</p>
+              
+              <div id="investAmountContainer" class="hidden pt-1">
+                <label class="block font-medium text-slate-700">每月定期定額金額 (NT$)：</label>
+                <input type="number" id="customMonthlyInvest" value="10000" step="1000" class="w-full p-1.5 border rounded bg-white">
+                <p class="text-[10px] text-slate-400 mt-0.5">可將下方列舉出的「每月收支結餘」彈性填入此處。</p>
+              </div>
+            </div>
+
             <div>
               <label class="block font-medium">衝刺期年化報酬率：<span id="investRateVal" class="font-bold text-indigo-600">8.0%</span></label>
               <input type="range" id="investRate" min="3" max="15" step="0.5" value="8" class="w-full">
@@ -108,9 +124,9 @@
         
         <!-- KPI 數據卡片 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-          <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
-            <div class="text-xs text-indigo-600 font-semibold">目前每月扣除支出後淨額</div>
-            <div id="investableCash" class="text-lg font-black text-indigo-900">NT$ 0</div>
+          <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+            <div class="text-xs text-amber-700 font-semibold">目前每月收支盈餘(結餘)</div>
+            <div id="surplusCash" class="text-lg font-black text-amber-900">NT$ 0</div>
           </div>
           <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl">
             <div class="text-xs text-blue-600 font-semibold">退休預估總資產</div>
@@ -122,9 +138,12 @@
           </div>
         </div>
 
-        <!-- 支出結構摘要與觀念說明卡片 -->
+        <!-- 每月收支與盈餘列舉明細 -->
         <div class="bg-slate-50 p-4 border rounded-xl text-xs space-y-2 text-slate-600">
-          <div class="font-bold text-slate-800 border-b pb-1">💡 每月現金流分析明細：</div>
+          <div class="font-bold text-slate-800 border-b pb-1 flex justify-between items-center">
+            <span>📊 每月收支與盈餘列舉明細：</span>
+            <span id="investStatusBadge" class="px-2 py-0.5 rounded text-[10px] bg-slate-200 text-slate-700 font-normal">僅試算既有本金複利</span>
+          </div>
           <div class="grid grid-cols-2 gap-x-4 gap-y-1">
             <div class="flex justify-between"><span>+ 每月薪資收入：</span><span id="detailSalary" class="font-semibold text-emerald-600">NT$ 0</span></div>
             <div class="flex justify-between"><span>- 每月基本生活費：</span><span id="detailLiving" class="font-semibold text-rose-500">NT$ 0</span></div>
@@ -133,16 +152,19 @@
             <div class="flex justify-between col-span-2"><span>- 房貸+車貸月付金：</span><span id="detailLoans" class="font-semibold text-rose-500">NT$ 0</span></div>
           </div>
 
-          <!-- 衝刺期說明 -->
-          <div class="mt-3 pt-2 border-t border-slate-200 text-[11px] leading-relaxed text-slate-500">
-            <span class="font-bold text-indigo-800">📘 觀念科普｜衝刺期年化報酬率：</span>
-            指退休前的「資產累積階段」，你將剩餘現金流投入大盤或指數型標的，預期該投資組合平均每年的複利成長率（台/美股大盤歷史平均約 7%~9%）。
+          <div class="pt-2 border-t border-slate-200 flex justify-between items-center font-bold text-slate-800 text-sm">
+            <span>＝ 每月可支配收支盈餘 (未扣投資)：</span>
+            <span id="detailSurplus" class="text-amber-700">NT$ 0</span>
+          </div>
+
+          <div class="text-[11px] leading-relaxed text-slate-500 pt-1">
+            💡 <strong>說明：</strong> 目前預設<strong>不自動將盈餘投入投資</strong>。若你想將部分或全部盈餘拿來定期定額，可在左側「5. 投資策略」勾選開關並填入每月欲投入的金額。
           </div>
         </div>
 
         <!-- 資產成長圖表 -->
         <div class="bg-white p-4 border rounded-xl shadow-sm">
-          <h4 class="text-xs font-bold text-slate-500 mb-2">預估資產累積趨勢圖（涵蓋房貸還清後之金流釋出）</h4>
+          <h4 class="text-xs font-bold text-slate-500 mb-2">預估資產累積趨勢圖</h4>
           <div class="relative h-72 w-full">
             <canvas id="proChart"></canvas>
           </div>
@@ -177,6 +199,18 @@
       }
     });
 
+    const enableCheckbox = document.getElementById('enableMonthlyInvest');
+    const investContainer = document.getElementById('investAmountContainer');
+
+    enableCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        investContainer.classList.remove('hidden');
+      } else {
+        investContainer.classList.add('hidden');
+      }
+      calculate();
+    });
+
     function calculate() {
       const curAge = parseInt(document.getElementById('currentAge').value);
       const retAge = parseInt(document.getElementById('retireAge').value);
@@ -194,23 +228,38 @@
       const investRate = parseFloat(document.getElementById('investRate').value) / 100 / 12;
       const retireYield = parseFloat(document.getElementById('retireYield').value) / 100;
 
+      const isInvestEnabled = enableCheckbox.checked;
+      const customInvestVal = parseFloat(document.getElementById('customMonthlyInvest').value) || 0;
+
       document.getElementById('currentAgeVal').innerText = curAge;
       document.getElementById('retireAgeVal').innerText = retAge;
       document.getElementById('mortgageYearsVal').innerText = mortgageYears;
       document.getElementById('investRateVal').innerText = (investRate * 12 * 100).toFixed(1) + '%';
       document.getElementById('retireYieldVal').innerText = (retireYield * 100).toFixed(1) + '%';
 
-      // 支出明細顯示
+      // 每月收支與盈餘計算
+      const totalMonthlyExpenses = monthlyExpenses + monthlyInsurance + monthlyOthers + mortgagePmt + carLoanPmt;
+      const monthlySurplus = salary - totalMonthlyExpenses;
+
+      // 畫面明細更新
       document.getElementById('detailSalary').innerText = 'NT$ ' + salary.toLocaleString();
       document.getElementById('detailLiving').innerText = 'NT$ ' + monthlyExpenses.toLocaleString();
       document.getElementById('detailInsurance').innerText = 'NT$ ' + monthlyInsurance.toLocaleString();
       document.getElementById('detailOthers').innerText = 'NT$ ' + monthlyOthers.toLocaleString();
       document.getElementById('detailLoans').innerText = 'NT$ ' + (mortgagePmt + carLoanPmt).toLocaleString();
+      document.getElementById('detailSurplus').innerText = 'NT$ ' + monthlySurplus.toLocaleString();
+      document.getElementById('surplusCash').innerText = 'NT$ ' + monthlySurplus.toLocaleString();
 
-      // 當前淨可用投資額
-      const initialInvestable = salary - monthlyExpenses - monthlyInsurance - monthlyOthers - mortgagePmt - carLoanPmt;
-      document.getElementById('investableCash').innerText = 'NT$ ' + (initialInvestable > 0 ? initialInvestable.toLocaleString() : '0 (金流不足)');
+      const badge = document.getElementById('investStatusBadge');
+      if (isInvestEnabled) {
+        badge.innerText = '已啟用定期定額：NT$ ' + customInvestVal.toLocaleString() + ' /月';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] bg-indigo-100 text-indigo-700 font-bold';
+      } else {
+        badge.innerText = '僅試算既有本金複利';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] bg-slate-200 text-slate-700 font-normal';
+      }
 
+      // 資產成長試算
       let labels = [], data = [];
       let currentVal = initialCapital;
       const totalYears = retAge - curAge;
@@ -220,10 +269,8 @@
         if (y === 0) {
           data.push(initialCapital);
         } else {
-          // 動態房貸還清邏輯
-          let activeMortgage = (y <= mortgageYears) ? mortgagePmt : 0;
-          let monthlyInvest = salary - monthlyExpenses - monthlyInsurance - monthlyOthers - activeMortgage - carLoanPmt;
-          if (monthlyInvest < 0) monthlyInvest = 0;
+          // 若未勾選，定期定額額度為 0
+          let monthlyInvest = isInvestEnabled ? customInvestVal : 0;
 
           for (let m = 0; m < 12; m++) {
             currentVal = currentVal * (1 + investRate) + monthlyInvest;
