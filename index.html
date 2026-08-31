@@ -12,7 +12,7 @@
     <!-- 頁頭標題 -->
     <div class="border-b pb-4 mb-6">
       <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-950">客製化收支出推算系統-中和小陳設計</h1>
-      <p class="text-slate-500 text-sm mt-1">獨立列出每月結餘、房貸寬限期動態金流與逐年資產變化明細。</p>
+      <p class="text-slate-500 text-sm mt-1">獨立列出每月結餘、房貸寬限期動態金流、每年總支出與資產增幅比例明細。</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -177,17 +177,19 @@
         <div class="bg-white p-4 border rounded-xl shadow-sm overflow-hidden">
           <h4 class="text-xs font-bold text-indigo-950 mb-3 flex items-center gap-1">
             <span>📋 逐年資金變化詳細計算表</span>
-            <span class="text-[10px] font-normal text-slate-400">（依據房貸寬限期與貸款還清動態推算）</span>
+            <span class="text-[10px] font-normal text-slate-400">（含每年總支出與資產年度增幅 %）</span>
           </h4>
-          <div class="overflow-x-auto max-h-72">
+          <div class="overflow-x-auto max-h-80">
             <table class="w-full text-left text-xs border-collapse">
               <thead class="bg-slate-100 sticky top-0 text-slate-700 font-bold border-b border-slate-200">
                 <tr>
-                  <th class="p-2">年齡</th>
-                  <th class="p-2">每月房貸扣額</th>
-                  <th class="p-2">每月收支盈餘</th>
-                  <th class="p-2">資產總額 (年終)</th>
-                  <th class="p-2">預估月配息金額</th>
+                  <th class="p-2 whitespace-nowrap">年齡</th>
+                  <th class="p-2 whitespace-nowrap">每月房貸扣額</th>
+                  <th class="p-2 whitespace-nowrap">每年總支出</th>
+                  <th class="p-2 whitespace-nowrap">每月收支盈餘</th>
+                  <th class="p-2 whitespace-nowrap">資產總額 (年終)</th>
+                  <th class="p-2 whitespace-nowrap">資產年增幅</th>
+                  <th class="p-2 whitespace-nowrap">預估月配息</th>
                 </tr>
               </thead>
               <tbody id="detailTableBody" class="divide-y divide-slate-100 text-slate-600">
@@ -294,6 +296,7 @@
       let labels = [], data = [];
       let tableRowsHtml = '';
       let currentVal = initialCapital;
+      let prevVal = initialCapital;
       const totalYears = (retAge >= curAge) ? (retAge - curAge) : 0;
 
       for (let y = 0; y <= totalYears; y++) {
@@ -314,19 +317,25 @@
           }
         }
 
+        // 當月總支出與每年總支出
+        const currentMonthlyTotalExpense = monthlyExpenses + monthlyInsurance + monthlyOthers + currentMortgagePmt + carLoanPmt;
+        const currentAnnualTotalExpense = currentMonthlyTotalExpense * 12;
+
         // 計算當年度每月盈餘
-        const currentSurplus = salary - monthlyExpenses - monthlyInsurance - monthlyOthers - currentMortgagePmt - carLoanPmt;
+        const currentSurplus = salary - currentMonthlyTotalExpense;
 
         if (y === 0) {
           data.push(initialCapital);
           const monthlyYieldEst = Math.round((initialCapital * retireYield) / 12);
           tableRowsHtml += `
             <tr class="hover:bg-slate-50">
-              <td class="p-2 font-bold text-indigo-900">${age} 歲 (起點)</td>
-              <td class="p-2">NT$ ${currentMortgagePmt.toLocaleString()} <span class="text-[10px] text-slate-400">(${mortgageNote})</span></td>
-              <td class="p-2 font-semibold text-amber-800">NT$ ${currentSurplus.toLocaleString()}</td>
-              <td class="p-2 font-bold text-indigo-600">NT$ ${Math.round(initialCapital).toLocaleString()}</td>
-              <td class="p-2 text-emerald-700">NT$ ${monthlyYieldEst.toLocaleString()} /月</td>
+              <td class="p-2 font-bold text-indigo-900 whitespace-nowrap">${age} 歲 (起點)</td>
+              <td class="p-2 whitespace-nowrap">NT$ ${currentMortgagePmt.toLocaleString()} <span class="text-[10px] text-slate-400">(${mortgageNote})</span></td>
+              <td class="p-2 font-semibold text-rose-600 whitespace-nowrap">NT$ ${currentAnnualTotalExpense.toLocaleString()}</td>
+              <td class="p-2 font-semibold text-amber-800 whitespace-nowrap">NT$ ${currentSurplus.toLocaleString()}</td>
+              <td class="p-2 font-bold text-indigo-600 whitespace-nowrap">NT$ ${Math.round(initialCapital).toLocaleString()}</td>
+              <td class="p-2 text-slate-400 whitespace-nowrap">-</td>
+              <td class="p-2 text-emerald-700 whitespace-nowrap">NT$ ${monthlyYieldEst.toLocaleString()} /月</td>
             </tr>
           `;
         } else {
@@ -339,17 +348,29 @@
 
           const roundedAsset = Math.round(currentVal);
           const monthlyYieldEst = Math.round((roundedAsset * retireYield) / 12);
+          
+          // 計算資產年度增幅 %
+          let growthRateText = "0.0%";
+          if (prevVal > 0) {
+            const growthRate = ((roundedAsset - prevVal) / prevVal) * 100;
+            growthRateText = (growthRate >= 0 ? '+' : '') + growthRate.toFixed(1) + '%';
+          }
+
           data.push(roundedAsset);
 
           tableRowsHtml += `
             <tr class="hover:bg-slate-50">
-              <td class="p-2 font-bold text-slate-800">${age} 歲 ${age === retAge ? '<span class="text-rose-600 font-extrabold">(退休)</span>' : ''}</td>
-              <td class="p-2">NT$ ${currentMortgagePmt.toLocaleString()} <span class="text-[10px] text-slate-400">(${mortgageNote})</span></td>
-              <td class="p-2 font-semibold text-amber-800">NT$ ${currentSurplus.toLocaleString()}</td>
-              <td class="p-2 font-bold text-indigo-600">NT$ ${roundedAsset.toLocaleString()}</td>
-              <td class="p-2 text-emerald-700 font-medium">NT$ ${monthlyYieldEst.toLocaleString()} /月</td>
+              <td class="p-2 font-bold text-slate-800 whitespace-nowrap">${age} 歲 ${age === retAge ? '<span class="text-rose-600 font-extrabold">(退休)</span>' : ''}</td>
+              <td class="p-2 whitespace-nowrap">NT$ ${currentMortgagePmt.toLocaleString()} <span class="text-[10px] text-slate-400">(${mortgageNote})</span></td>
+              <td class="p-2 font-semibold text-rose-600 whitespace-nowrap">NT$ ${currentAnnualTotalExpense.toLocaleString()}</td>
+              <td class="p-2 font-semibold text-amber-800 whitespace-nowrap">NT$ ${currentSurplus.toLocaleString()}</td>
+              <td class="p-2 font-bold text-indigo-600 whitespace-nowrap">NT$ ${roundedAsset.toLocaleString()}</td>
+              <td class="p-2 font-bold ${roundedAsset >= prevVal ? 'text-emerald-600' : 'text-rose-500'} whitespace-nowrap">${growthRateText}</td>
+              <td class="p-2 text-emerald-700 font-medium whitespace-nowrap">NT$ ${monthlyYieldEst.toLocaleString()} /月</td>
             </tr>
           `;
+
+          prevVal = roundedAsset;
         }
       }
 
