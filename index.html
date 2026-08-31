@@ -11,7 +11,7 @@
   <div class="max-w-5xl mx-auto bg-white p-5 md:p-8 rounded-2xl shadow-xl border border-slate-200">
     <div class="border-b pb-4 mb-6">
       <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-950">個人化收支與退休規劃系統</h1>
-      <p class="text-slate-500 text-sm mt-1">精確設定生活費、年繳保費與貸款，算出專屬於你的真正資產成長曲線。</p>
+      <p class="text-slate-500 text-sm mt-1">精確設定每月生活費、保費與貸款，算出專屬於你的真正資產成長曲線。</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -44,22 +44,21 @@
           </div>
         </div>
 
-        <!-- 3. 個人開銷細項 -->
+        <!-- 3. 每月個人開銷細項（改為月計） -->
         <div>
-          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">3. 個人支出細項</h3>
+          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">3. 每月支出細項</h3>
           <div class="space-y-2">
             <div>
-              <label class="block font-medium">每月生活開銷 (NT$)：</label>
+              <label class="block font-medium">每月基本生活開銷 (NT$)：</label>
               <input type="number" id="monthlyExpenses" value="20000" step="1000" class="w-full p-1.5 border rounded">
             </div>
             <div>
-              <label class="block font-medium">每年保險費總額 (NT$)：</label>
-              <input type="number" id="annualInsurance" value="36000" step="3000" class="w-full p-1.5 border rounded">
-              <span class="text-slate-400 text-[11px]">（自動按月攤提約 <span id="monthlyInsuranceVal">3,000</span> 元）</span>
+              <label class="block font-medium">每月保險費用 (NT$)：</label>
+              <input type="number" id="monthlyInsurance" value="3000" step="500" class="w-full p-1.5 border rounded">
             </div>
             <div>
-              <label class="block font-medium">每年其他固定雜支/稅金 (NT$)：</label>
-              <input type="number" id="annualOthers" value="24000" step="2000" class="w-full p-1.5 border rounded">
+              <label class="block font-medium">每月固定雜支/娛樂預算 (NT$)：</label>
+              <input type="number" id="monthlyOthers" value="2000" step="500" class="w-full p-1.5 border rounded">
             </div>
           </div>
         </div>
@@ -105,7 +104,7 @@
       </div>
 
       <!-- 右側：結果儀表板與圖表 -->
-      <div class="lg:col-span-2 space-y-6">
+      <div class="lg:col-span-2 space-y-5">
         
         <!-- KPI 數據卡片 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
@@ -123,13 +122,22 @@
           </div>
         </div>
 
-        <!-- 支出結構摘要 -->
-        <div class="bg-slate-50 p-4 border rounded-xl text-xs space-y-1 text-slate-600">
-          <div class="font-bold text-slate-800 mb-1">💡 每月現金流分析明細：</div>
-          <div class="flex justify-between"><span>+ 每月薪資收入：</span><span id="detailSalary" class="font-semibold text-emerald-600">NT$ 0</span></div>
-          <div class="flex justify-between"><span>- 每月基本生活費：</span><span id="detailLiving" class="font-semibold text-rose-500">NT$ 0</span></div>
-          <div class="flex justify-between"><span>- 年繳保費/雜支（月攤提）：</span><span id="detailAnnualExp" class="font-semibold text-rose-500">NT$ 0</span></div>
-          <div class="flex justify-between"><span>- 房貸+車貸月付金：</span><span id="detailLoans" class="font-semibold text-rose-500">NT$ 0</span></div>
+        <!-- 支出結構摘要與觀念說明卡片 -->
+        <div class="bg-slate-50 p-4 border rounded-xl text-xs space-y-2 text-slate-600">
+          <div class="font-bold text-slate-800 border-b pb-1">💡 每月現金流分析明細：</div>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+            <div class="flex justify-between"><span>+ 每月薪資收入：</span><span id="detailSalary" class="font-semibold text-emerald-600">NT$ 0</span></div>
+            <div class="flex justify-between"><span>- 每月基本生活費：</span><span id="detailLiving" class="font-semibold text-rose-500">NT$ 0</span></div>
+            <div class="flex justify-between"><span>- 每月保費支出：</span><span id="detailInsurance" class="font-semibold text-rose-500">NT$ 0</span></div>
+            <div class="flex justify-between"><span>- 每月雜支預算：</span><span id="detailOthers" class="font-semibold text-rose-500">NT$ 0</span></div>
+            <div class="flex justify-between col-span-2"><span>- 房貸+車貸月付金：</span><span id="detailLoans" class="font-semibold text-rose-500">NT$ 0</span></div>
+          </div>
+
+          <!-- 衝刺期說明 -->
+          <div class="mt-3 pt-2 border-t border-slate-200 text-[11px] leading-relaxed text-slate-500">
+            <span class="font-bold text-indigo-800">📘 觀念科普｜衝刺期年化報酬率：</span>
+            指退休前的「資產累積階段」，你將剩餘現金流投入大盤或指數型標的，預期該投資組合平均每年的複利成長率（台/美股大盤歷史平均約 7%~9%）。
+          </div>
         </div>
 
         <!-- 資產成長圖表 -->
@@ -175,8 +183,8 @@
       const salary = parseFloat(document.getElementById('salary').value) || 0;
       
       const monthlyExpenses = parseFloat(document.getElementById('monthlyExpenses').value) || 0;
-      const annualInsurance = parseFloat(document.getElementById('annualInsurance').value) || 0;
-      const annualOthers = parseFloat(document.getElementById('annualOthers').value) || 0;
+      const monthlyInsurance = parseFloat(document.getElementById('monthlyInsurance').value) || 0;
+      const monthlyOthers = parseFloat(document.getElementById('monthlyOthers').value) || 0;
       
       const mortgagePmt = parseFloat(document.getElementById('mortgagePmt').value) || 0;
       const mortgageYears = parseInt(document.getElementById('mortgageYears').value);
@@ -186,25 +194,21 @@
       const investRate = parseFloat(document.getElementById('investRate').value) / 100 / 12;
       const retireYield = parseFloat(document.getElementById('retireYield').value) / 100;
 
-      // 月攤提計算
-      const monthlyInsurance = Math.round(annualInsurance / 12);
-      const monthlyAnnualExp = Math.round((annualInsurance + annualOthers) / 12);
-
       document.getElementById('currentAgeVal').innerText = curAge;
       document.getElementById('retireAgeVal').innerText = retAge;
       document.getElementById('mortgageYearsVal').innerText = mortgageYears;
-      document.getElementById('monthlyInsuranceVal').innerText = monthlyInsurance.toLocaleString();
       document.getElementById('investRateVal').innerText = (investRate * 12 * 100).toFixed(1) + '%';
       document.getElementById('retireYieldVal').innerText = (retireYield * 100).toFixed(1) + '%';
 
       // 支出明細顯示
       document.getElementById('detailSalary').innerText = 'NT$ ' + salary.toLocaleString();
       document.getElementById('detailLiving').innerText = 'NT$ ' + monthlyExpenses.toLocaleString();
-      document.getElementById('detailAnnualExp').innerText = 'NT$ ' + monthlyAnnualExp.toLocaleString();
+      document.getElementById('detailInsurance').innerText = 'NT$ ' + monthlyInsurance.toLocaleString();
+      document.getElementById('detailOthers').innerText = 'NT$ ' + monthlyOthers.toLocaleString();
       document.getElementById('detailLoans').innerText = 'NT$ ' + (mortgagePmt + carLoanPmt).toLocaleString();
 
       // 當前淨可用投資額
-      const initialInvestable = salary - monthlyExpenses - monthlyAnnualExp - mortgagePmt - carLoanPmt;
+      const initialInvestable = salary - monthlyExpenses - monthlyInsurance - monthlyOthers - mortgagePmt - carLoanPmt;
       document.getElementById('investableCash').innerText = 'NT$ ' + (initialInvestable > 0 ? initialInvestable.toLocaleString() : '0 (金流不足)');
 
       let labels = [], data = [];
@@ -218,7 +222,7 @@
         } else {
           // 動態房貸還清邏輯
           let activeMortgage = (y <= mortgageYears) ? mortgagePmt : 0;
-          let monthlyInvest = salary - monthlyExpenses - monthlyAnnualExp - activeMortgage - carLoanPmt;
+          let monthlyInvest = salary - monthlyExpenses - monthlyInsurance - monthlyOthers - activeMortgage - carLoanPmt;
           if (monthlyInvest < 0) monthlyInvest = 0;
 
           for (let m = 0; m < 12; m++) {
