@@ -95,12 +95,23 @@
           </div>
         </div>
 
-        <!-- 5. 投資策略與開關 -->
+        <!-- 5. 投資策略與選擇 -->
         <div>
-          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">5. 投資策略與定期定額</h3>
+          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">5. 投資策略與工具</h3>
           <div class="space-y-3">
+            
+            <!-- 新增投資工具選擇 -->
             <div>
-              <label class="block font-medium">現有投資本金 (單筆) (NT$)：</label>
+              <label class="block font-medium mb-1">理財/投資工具選擇：</label>
+              <select id="investStrategy" class="w-full p-1.5 border rounded bg-white font-medium text-indigo-900">
+                <option value="none">無特別投資（純現金/活存）</option>
+                <option value="deposit">銀行定存 (約 1.7%)</option>
+                <option value="fund" selected>基金 / ETF / 股市投資 (自訂報酬率)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-medium">現有投資/存款本金 (NT$)：</label>
               <input type="number" id="initialCapital" value="500000" step="50000" class="w-full p-1.5 border rounded">
             </div>
 
@@ -118,10 +129,11 @@
               </div>
             </div>
 
-            <div>
-              <label class="block font-medium">衝刺期年化報酬率：<span id="investRateVal" class="font-bold text-indigo-600">8.0%</span></label>
+            <div id="rateSliderBlock">
+              <label class="block font-medium">衝刺期預估年化報酬率：<span id="investRateVal" class="font-bold text-indigo-600">8.0%</span></label>
               <input type="range" id="investRate" min="0" max="20" step="0.5" value="8" class="w-full">
             </div>
+            
             <div>
               <label class="block font-medium">退休轉化殖利率：<span id="retireYieldVal" class="font-bold text-indigo-600">5.0%</span></label>
               <input type="range" id="retireYield" min="0" max="15" step="0.5" value="5" class="w-full">
@@ -230,6 +242,20 @@
 
     const enableCheckbox = document.getElementById('enableMonthlyInvest');
     const investContainer = document.getElementById('investAmountContainer');
+    const strategySelect = document.getElementById('investStrategy');
+    const rateInput = document.getElementById('investRate');
+
+    // 選擇投資策略後的拉桿切換
+    strategySelect.addEventListener('change', function() {
+      if (this.value === 'none') {
+        rateInput.value = 0;
+      } else if (this.value === 'deposit') {
+        rateInput.value = 1.7;
+      } else if (this.value === 'fund') {
+        rateInput.value = 8.0;
+      }
+      calculate();
+    });
 
     enableCheckbox.addEventListener('change', function() {
       if (this.checked) {
@@ -284,11 +310,13 @@
       document.getElementById('surplusCash').innerText = 'NT$ ' + initialSurplus.toLocaleString();
 
       const badge = document.getElementById('investStatusBadge');
+      const strategyText = strategySelect.options[strategySelect.selectedIndex].text;
+
       if (isInvestEnabled) {
-        badge.innerText = '已啟用定期定額：NT$ ' + customInvestVal.toLocaleString() + ' /月';
+        badge.innerText = `${strategyText} | 定期定額：NT$ ${customInvestVal.toLocaleString()} /月`;
         badge.className = 'px-2 py-0.5 rounded text-[10px] bg-indigo-100 text-indigo-700 font-bold';
       } else {
-        badge.innerText = '僅試算既有本金複利';
+        badge.innerText = `${strategyText} | 單筆滾存`;
         badge.className = 'px-2 py-0.5 rounded text-[10px] bg-slate-200 text-slate-700 font-normal';
       }
 
