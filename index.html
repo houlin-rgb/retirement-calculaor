@@ -12,7 +12,7 @@
     <!-- 頁頭標題 -->
     <div class="border-b pb-4 mb-6">
       <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-950">客製化收支出推算系統-中和小陳設計</h1>
-      <p class="text-slate-500 text-sm mt-1">獨立列出每月結餘、房貸寬限期動態金流、多元資產個別配置與資產增幅明細。</p>
+      <p class="text-slate-500 text-sm mt-1">獨立列出每月結餘、房貸寬限期動態金流、多元資產配置與理想退休目標缺口試算。</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -185,6 +185,18 @@
           </div>
         </div>
 
+        <!-- 6. 理想退休生活目標設定 -->
+        <div>
+          <h3 class="font-bold text-rose-900 mb-2 border-b pb-1">6. 理想退休生活目標</h3>
+          <div class="space-y-2 p-2.5 bg-rose-50/50 rounded-lg border border-rose-100">
+            <div>
+              <label class="block font-medium text-rose-950">理想退休每月現金流 (NT$)：</label>
+              <input type="number" id="targetMonthlyCash" value="60000" step="5000" class="w-full p-1.5 border rounded bg-white">
+            </div>
+            <p class="text-[11px] text-slate-500">系統將根據「退休轉化殖利率」自動換算為達標所需的總資產目標。</p>
+          </div>
+        </div>
+
       </div>
 
       <!-- 右側：結果儀表板、圖表與詳細試算表 -->
@@ -203,6 +215,36 @@
           <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
             <div class="text-xs text-emerald-600 font-semibold">退休預估每月現金流</div>
             <div id="retireMonthlyCash" class="text-lg font-black text-emerald-800">NT$ 0</div>
+          </div>
+        </div>
+
+        <!-- 🎯 理想 vs 現況 比較與缺口分析區塊 -->
+        <div id="gapCard" class="p-4 border rounded-xl bg-slate-50 space-y-3">
+          <div class="flex justify-between items-center border-b pb-2">
+            <h4 class="font-bold text-sm text-slate-800 flex items-center gap-1">
+              <span>🎯 理想退休生活 vs 目前規劃比較</span>
+            </h4>
+            <span id="gapBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold">計算中</span>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+            <div class="p-2 bg-white rounded border">
+              <span class="text-slate-500 block">理想退休月現金流：</span>
+              <span id="idealMonthlyVal" class="font-bold text-rose-600 text-sm">NT$ 0</span>
+            </div>
+            <div class="p-2 bg-white rounded border">
+              <span class="text-slate-500 block">理想退休總資產需求：</span>
+              <span id="idealTotalVal" class="font-bold text-rose-600 text-sm">NT$ 0</span>
+            </div>
+            <div class="p-2 bg-white rounded border col-span-2 md:col-span-1">
+              <span class="text-slate-500 block">預估資產缺口：</span>
+              <span id="gapAmountVal" class="font-bold text-slate-800 text-sm">NT$ 0</span>
+            </div>
+          </div>
+
+          <!-- 💡 調整建議方案區塊 -->
+          <div id="adviceBlock" class="p-3 rounded-lg text-xs space-y-1 bg-white border">
+            <!-- 動態注入調整建議內容 -->
           </div>
         </div>
 
@@ -305,6 +347,9 @@
       const retireYield = parseFloat(document.getElementById('retireYield').value) / 100;
       const isInvestEnabled = enableCheckbox.checked;
 
+      // 理想退休目標
+      const targetMonthlyCash = parseFloat(document.getElementById('targetMonthlyCash').value) || 0;
+
       // 讀取四種資產設定
       const capCash = parseFloat(document.getElementById('capCash').value) || 0;
       const invCash = parseFloat(document.getElementById('invCash').value) || 0;
@@ -331,7 +376,7 @@
       document.getElementById('rateStockVal').innerText = (rateStock * 12 * 100).toFixed(1);
       document.getElementById('retireYieldVal').innerText = (retireYield * 100).toFixed(1) + '%';
 
-      // 總初始本金
+      // 總初始本金與月投入
       const totalInitialCapital = capCash + capDeposit + capFund + capStock;
       const totalMonthlyInvest = invCash + invDeposit + invFund + invStock;
 
@@ -402,7 +447,6 @@
             </tr>
           `;
         } else {
-          // 進行 12 個月多軌獨立滾存
           const mCash = isInvestEnabled ? invCash : 0;
           const mDeposit = isInvestEnabled ? invDeposit : 0;
           const mFund = isInvestEnabled ? invFund : 0;
@@ -418,7 +462,6 @@
           const currentTotalAsset = Math.round(valCash + valDeposit + valFund + valStock);
           const monthlyYieldEst = Math.round((currentTotalAsset * retireYield) / 12);
 
-          // 計算資產年度增幅 %
           let growthRateText = "0.0%";
           if (prevTotalAsset > 0) {
             const growthRate = ((currentTotalAsset - prevTotalAsset) / prevTotalAsset) * 100;
@@ -449,6 +492,61 @@
       document.getElementById('retireTotalAsset').innerText = 'NT$ ' + finalAsset.toLocaleString();
       document.getElementById('retireMonthlyCash').innerText = 'NT$ ' + monthlyCash.toLocaleString();
       document.getElementById('detailTableBody').innerHTML = tableRowsHtml;
+
+      // 🎯 缺口計算與建議生成
+      const idealTotalAsset = retireYield > 0 ? Math.round((targetMonthlyCash * 12) / retireYield) : 0;
+      const gapAmount = idealTotalAsset - finalAsset;
+
+      document.getElementById('idealMonthlyVal').innerText = 'NT$ ' + targetMonthlyCash.toLocaleString() + ' /月';
+      document.getElementById('idealTotalVal').innerText = 'NT$ ' + idealTotalAsset.toLocaleString();
+
+      const gapBadge = document.getElementById('gapBadge');
+      const gapAmountVal = document.getElementById('gapAmountVal');
+      const adviceBlock = document.getElementById('adviceBlock');
+
+      if (gapAmount <= 0) {
+        // 達標狀況
+        gapBadge.innerText = '🎉 完美達標！';
+        gapBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+        gapAmountVal.innerText = '超額達標 NT$ ' + Math.abs(gapAmount).toLocaleString();
+        gapAmountVal.className = 'font-bold text-emerald-600 text-sm';
+        
+        adviceBlock.className = 'p-3 rounded-lg text-xs space-y-1 bg-emerald-50/70 border border-emerald-200 text-emerald-900';
+        adviceBlock.innerHTML = `
+          <div class="font-bold">✨ 系統建議：</div>
+          <p>您目前的規劃已經能順利達成理想的退休生活目標！可以保持現有的累積步調，或考慮適度放寬生活預算。</p>
+        `;
+      } else {
+        // 未達標/存在缺口
+        gapBadge.innerText = '⚠️ 存在缺口';
+        gapBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300';
+        gapAmountVal.innerText = '尚缺 NT$ ' + gapAmount.toLocaleString();
+        gapAmountVal.className = 'font-bold text-rose-600 text-sm';
+
+        // 試算建議：如果提高定期定額需要增加多少錢（假設投在基金/ETF 6% 複利）
+        const yearsToRetire = totalYears;
+        let addMonthlyInvestNeeded = 0;
+        if (yearsToRetire > 0) {
+          const r = rateFund; // 預設用基金年報酬算
+          const n = yearsToRetire * 12;
+          // FV = P * (((1+r)^n - 1) / r)  =>  P = FV * r / (((1+r)^n) - 1)
+          if (r > 0) {
+            addMonthlyInvestNeeded = Math.round((gapAmount * r) / (Math.pow(1 + r, n) - 1));
+          } else {
+            addMonthlyInvestNeeded = Math.round(gapAmount / n);
+          }
+        }
+
+        adviceBlock.className = 'p-3 rounded-lg text-xs space-y-1.5 bg-amber-50/80 border border-amber-200 text-amber-950';
+        adviceBlock.innerHTML = `
+          <div class="font-bold text-amber-900">💡 建議調整方案（擇一或組合執行）：</div>
+          <ul class="list-disc list-inside space-y-1 text-slate-700">
+            <li><strong>方案 A（增加投資）：</strong>建議每月可額外增加約 <span class="font-bold text-indigo-600">NT$ ${addMonthlyInvestNeeded.toLocaleString()}</span> 的定期定額投入（以年報酬 6% 估算）。</li>
+            <li><strong>方案 B（調整配置）：</strong>提高「股票/個股」或「基金/ETF」的投入比重，藉由提高整體年化報酬率來彌補缺口。</li>
+            <li><strong>方案 C（延後退休）：</strong>適度延長工作累積期，讓複利效應多滾存 2~3 年。</li>
+          </ul>
+        `;
+      }
 
       proChart.data.labels = labels;
       proChart.data.datasets[0].data = data;
