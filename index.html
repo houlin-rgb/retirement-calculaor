@@ -12,7 +12,7 @@
     <!-- 頁頭標題 -->
     <div class="border-b pb-4 mb-6">
       <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-950">客製化收支出推算系統-中和小陳設計</h1>
-      <p class="text-slate-500 text-sm mt-1">獨立列出每月結餘、房貸寬限期動態金流、月退金/被動收入、多元資產配置與理想退休目標缺口試算。</p>
+      <p class="text-slate-500 text-sm mt-1">獨立列出每月結餘、房貸寬限期動態金流、多元資產配置、月退金/被動收入與理想退休目標缺口試算。</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -34,19 +34,19 @@
           </div>
         </div>
 
-        <!-- 2. 收入設定 (新增月退金與二次就業說明) -->
+        <!-- 2. 收入設定 (新增月退金/被動收入，並支援退休後工作) -->
         <div>
-          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">2. 個人收入與退休後被動收入</h3>
+          <h3 class="font-bold text-indigo-900 mb-2 border-b pb-1">2. 個人收入與固定被動流</h3>
           <div class="space-y-2">
             <div>
-              <label class="block font-medium">每月工作薪水 (含退休後再就業薪資) (NT$)：</label>
+              <label class="block font-medium">每月工作薪水 (退休前後皆適用) (NT$)：</label>
               <input type="number" id="salary" value="60000" step="5000" class="w-full p-1.5 border rounded">
-              <span class="text-[10px] text-slate-400 block mt-0.5">※ 若退休後有新工作收入，可直接在此欄位維持或調整金額。</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">若退休後有重新工作或兼職，可在此填寫目前/未來薪資。</span>
             </div>
-            <div class="p-2 bg-emerald-50/70 border border-emerald-200 rounded-lg space-y-1 mt-1">
-              <label class="block font-bold text-emerald-900 text-[11px]">👴 退休後每月被動收入 / 月退金 (NT$)：</label>
-              <input type="number" id="retirePassiveIncome" value="20000" step="1000" class="w-full p-1 border rounded bg-white text-xs">
-              <span class="text-[10px] text-emerald-700 block">含勞保/勞退月退金、既有租金或固定配息，到達退休年齡後自動計入。</span>
+            <div>
+              <label class="block font-medium">每月固定被動收入 / 月退金 (NT$)：</label>
+              <input type="number" id="passiveIncome" value="0" step="1000" class="w-full p-1.5 border rounded bg-indigo-50/50">
+              <span class="text-[10px] text-slate-400 block mt-0.5">如：勞退月領、公教月退金、固定租金收益等。</span>
             </div>
           </div>
         </div>
@@ -196,10 +196,10 @@
           <h3 class="font-bold text-rose-900 mb-2 border-b pb-1">6. 理想退休生活目標</h3>
           <div class="space-y-2 p-2.5 bg-rose-50/50 rounded-lg border border-rose-100">
             <div>
-              <label class="block font-medium text-rose-950">理想退休每月現金流 (NT$)：</label>
+              <label class="block font-medium text-rose-950">理想退休每月總現金流需求 (NT$)：</label>
               <input type="number" id="targetMonthlyCash" value="60000" step="5000" class="w-full p-1.5 border rounded bg-white">
             </div>
-            <p class="text-[11px] text-slate-500">系統將根據「退休轉化殖利率」與「月退/被動收入」自動計算達成理想生活的資產需求與缺口。</p>
+            <p class="text-[11px] text-slate-500">扣除「月退金/被動收入」後，系統將自動計算需由資產殖利率補足的目標缺口。</p>
           </div>
         </div>
 
@@ -211,7 +211,7 @@
         <!-- KPI 數據卡片 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
           <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
-            <div class="text-xs text-amber-700 font-semibold">首年每月收支盈餘 (寬限期)</div>
+            <div class="text-xs text-amber-700 font-semibold">首年每月總盈餘 (含被動收入)</div>
             <div id="surplusCash" class="text-lg font-black text-amber-900">NT$ 0</div>
           </div>
           <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl">
@@ -221,7 +221,6 @@
           <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
             <div class="text-xs text-emerald-600 font-semibold">退休預估每月總現金流</div>
             <div id="retireMonthlyCash" class="text-lg font-black text-emerald-800">NT$ 0</div>
-            <div class="text-[10px] text-emerald-600 font-medium mt-0.5">(含資產配息 + 被動收入/月退金)</div>
           </div>
         </div>
 
@@ -262,11 +261,12 @@
             <span id="investStatusBadge" class="px-2 py-0.5 rounded text-[10px] bg-slate-200 text-slate-700 font-normal">僅試算既有本金複利</span>
           </div>
           <div class="grid grid-cols-2 gap-x-4 gap-y-1">
-            <div class="flex justify-between"><span>+ 每月工作薪資：</span><span id="detailSalary" class="font-semibold text-emerald-600">NT$ 0</span></div>
+            <div class="flex justify-between"><span>+ 每月薪資收入：</span><span id="detailSalary" class="font-semibold text-emerald-600">NT$ 0</span></div>
+            <div class="flex justify-between"><span>+ 每月被動收入/月退：</span><span id="detailPassive" class="font-semibold text-indigo-600">NT$ 0</span></div>
             <div class="flex justify-between"><span>- 每月基本生活費：</span><span id="detailLiving" class="font-semibold text-rose-500">NT$ 0</span></div>
             <div class="flex justify-between"><span>- 每月保費支出：</span><span id="detailInsurance" class="font-semibold text-rose-500">NT$ 0</span></div>
             <div class="flex justify-between"><span>- 每月雜支預算：</span><span id="detailOthers" class="font-semibold text-rose-500">NT$ 0</span></div>
-            <div class="flex justify-between col-span-2"><span>- 房貸(寬限期內) / 本息 / 車貸：</span><span id="detailLoans" class="font-semibold text-rose-500">NT$ 0</span></div>
+            <div class="flex justify-between"><span>- 房貸/本息/車貸：</span><span id="detailLoans" class="font-semibold text-rose-500">NT$ 0</span></div>
           </div>
         </div>
 
@@ -282,7 +282,7 @@
         <div class="bg-white p-4 border rounded-xl shadow-sm overflow-hidden">
           <h4 class="text-xs font-bold text-indigo-950 mb-3 flex items-center gap-1">
             <span>📋 逐年資金變化詳細計算表</span>
-            <span class="text-[10px] font-normal text-slate-400">（多軌資產獨立複利計算，含退休後月退/被動收入）</span>
+            <span class="text-[10px] font-normal text-slate-400">（多軌資產獨立複利計算）</span>
           </h4>
           <div class="overflow-x-auto max-h-80">
             <table class="w-full text-left text-xs border-collapse">
@@ -340,7 +340,7 @@
       const curAge = parseInt(document.getElementById('currentAge').value);
       const retAge = parseInt(document.getElementById('retireAge').value);
       const salary = parseFloat(document.getElementById('salary').value) || 0;
-      const retirePassiveIncome = parseFloat(document.getElementById('retirePassiveIncome').value) || 0;
+      const passiveIncome = parseFloat(document.getElementById('passiveIncome').value) || 0;
       
       const monthlyExpenses = parseFloat(document.getElementById('monthlyExpenses').value) || 0;
       const monthlyInsurance = parseFloat(document.getElementById('monthlyInsurance').value) || 0;
@@ -390,9 +390,10 @@
 
       // 第一年房貸與收支狀況
       let initialMortgagePmt = (graceYears > 0 && mortgageYears > 0) ? gracePmt : (mortgageYears > 0 ? mortgagePmt : 0);
-      const initialSurplus = salary - monthlyExpenses - monthlyInsurance - monthlyOthers - initialMortgagePmt - carLoanPmt;
+      const initialSurplus = salary + passiveIncome - monthlyExpenses - monthlyInsurance - monthlyOthers - initialMortgagePmt - carLoanPmt;
 
       document.getElementById('detailSalary').innerText = 'NT$ ' + salary.toLocaleString();
+      document.getElementById('detailPassive').innerText = 'NT$ ' + passiveIncome.toLocaleString();
       document.getElementById('detailLiving').innerText = 'NT$ ' + monthlyExpenses.toLocaleString();
       document.getElementById('detailInsurance').innerText = 'NT$ ' + monthlyInsurance.toLocaleString();
       document.getElementById('detailOthers').innerText = 'NT$ ' + monthlyOthers.toLocaleString();
@@ -438,16 +439,11 @@
 
         const currentMonthlyTotalExpense = monthlyExpenses + monthlyInsurance + monthlyOthers + currentMortgagePmt + carLoanPmt;
         const currentAnnualTotalExpense = currentMonthlyTotalExpense * 12;
-        
-        // 判定是否達到退休年齡以加入月退/被動收入
-        const isRetired = age >= retAge;
-        const currentPassiveIncome = isRetired ? retirePassiveIncome : 0;
-        const currentMonthlyIncome = salary + currentPassiveIncome;
-        const currentSurplus = currentMonthlyIncome - currentMonthlyTotalExpense;
+        const currentSurplus = salary + passiveIncome - currentMonthlyTotalExpense;
 
         if (y === 0) {
           data.push(totalInitialCapital);
-          const monthlyYieldEst = Math.round((totalInitialCapital * retireYield) / 12) + currentPassiveIncome;
+          const monthlyYieldEst = Math.round((totalInitialCapital * retireYield) / 12) + passiveIncome;
           tableRowsHtml += `
             <tr class="hover:bg-slate-50">
               <td class="p-2 font-bold text-indigo-900 whitespace-nowrap">${age} 歲 (起點)</td>
@@ -473,7 +469,7 @@
           }
 
           const currentTotalAsset = Math.round(valCash + valDeposit + valFund + valStock);
-          const monthlyYieldEst = Math.round((currentTotalAsset * retireYield) / 12) + currentPassiveIncome;
+          const monthlyYieldEst = Math.round((currentTotalAsset * retireYield) / 12) + passiveIncome;
 
           let growthRateText = "0.0%";
           if (prevTotalAsset > 0) {
@@ -485,13 +481,13 @@
 
           tableRowsHtml += `
             <tr class="hover:bg-slate-50">
-              <td class="p-2 font-bold text-slate-800 whitespace-nowrap">${age} 歲 ${isRetired ? '<span class="text-rose-600 font-extrabold">(退休)</span>' : ''}</td>
+              <td class="p-2 font-bold text-slate-800 whitespace-nowrap">${age} 歲 ${age === retAge ? '<span class="text-rose-600 font-extrabold">(退休)</span>' : ''}</td>
               <td class="p-2 whitespace-nowrap">NT$ ${currentMortgagePmt.toLocaleString()} <span class="text-[10px] text-slate-400">(${mortgageNote})</span></td>
               <td class="p-2 font-semibold text-rose-600 whitespace-nowrap">NT$ ${currentAnnualTotalExpense.toLocaleString()}</td>
               <td class="p-2 font-semibold text-amber-800 whitespace-nowrap">NT$ ${currentSurplus.toLocaleString()}</td>
               <td class="p-2 font-bold text-indigo-600 whitespace-nowrap">NT$ ${currentTotalAsset.toLocaleString()}</td>
               <td class="p-2 font-bold ${currentTotalAsset >= prevTotalAsset ? 'text-emerald-600' : 'text-rose-500'} whitespace-nowrap">${growthRateText}</td>
-              <td class="p-2 text-emerald-700 font-medium whitespace-nowrap">NT$ ${monthlyYieldEst.toLocaleString()} /月 ${currentPassiveIncome > 0 ? '<span class="text-[10px] text-emerald-600">(含月退)</span>' : ''}</td>
+              <td class="p-2 text-emerald-700 font-medium whitespace-nowrap">NT$ ${monthlyYieldEst.toLocaleString()} /月</td>
             </tr>
           `;
 
@@ -500,21 +496,21 @@
       }
 
       const finalAsset = data[data.length - 1] || 0;
-      // 退休總現金流 = 資產殖利率配息 + 每月被動收入/月退金
-      const monthlyCashFromAsset = Math.round((finalAsset * retireYield) / 12);
-      const totalRetireMonthlyCash = monthlyCashFromAsset + retirePassiveIncome;
+      // 退休總月現金流 = (退休總資產 * 殖利率 / 12) + 固定月退金/被動收入
+      const monthlyAssetCash = Math.round((finalAsset * retireYield) / 12);
+      const totalRetireMonthlyCash = monthlyAssetCash + passiveIncome;
 
       document.getElementById('retireTotalAsset').innerText = 'NT$ ' + finalAsset.toLocaleString();
       document.getElementById('retireMonthlyCash').innerText = 'NT$ ' + totalRetireMonthlyCash.toLocaleString();
       document.getElementById('detailTableBody').innerHTML = tableRowsHtml;
 
-      // 🎯 缺口計算與建議生成 (考量月退金後的實際需補足缺口)
-      const neededFromAsset = Math.max(0, targetMonthlyCash - retirePassiveIncome);
-      const idealTotalAsset = retireYield > 0 ? Math.round((neededFromAsset * 12) / retireYield) : 0;
+      // 🎯 缺口計算與建議生成 (考慮固定月退金/被動收入抵扣)
+      const remainingTargetCash = Math.max(0, targetMonthlyCash - passiveIncome);
+      const idealTotalAsset = retireYield > 0 ? Math.round((remainingTargetCash * 12) / retireYield) : 0;
       const gapAmount = idealTotalAsset - finalAsset;
 
       document.getElementById('idealMonthlyVal').innerText = 'NT$ ' + targetMonthlyCash.toLocaleString() + ' /月';
-      document.getElementById('idealTotalVal').innerText = 'NT$ ' + idealTotalAsset.toLocaleString();
+      document.getElementById('idealTotalVal').innerText = 'NT$ ' + idealTotalAsset.toLocaleString() + (passiveIncome > 0 ? ` (已扣除月退 NT$ ${passiveIncome.toLocaleString()})` : '');
 
       const gapBadge = document.getElementById('gapBadge');
       const gapAmountVal = document.getElementById('gapAmountVal');
@@ -529,7 +525,7 @@
         adviceBlock.className = 'p-3 rounded-lg text-xs space-y-1 bg-emerald-50/70 border border-emerald-200 text-emerald-900';
         adviceBlock.innerHTML = `
           <div class="font-bold">✨ 系統建議：</div>
-          <p>加上月退金/被動收入與資產累積後，您目前的規劃已經能順利達成理想退休生活目標！可以保持現有的累積步調。</p>
+          <p>您目前的資產累積結合固定被動收入/月退金，已能輕鬆滿足理想退休目標！可以維持目前配置或適度增加生活消費體驗。</p>
         `;
       } else {
         gapBadge.innerText = '⚠️ 存在缺口';
@@ -553,9 +549,9 @@
         adviceBlock.innerHTML = `
           <div class="font-bold text-amber-900">💡 建議調整方案（擇一或組合執行）：</div>
           <ul class="list-disc list-inside space-y-1 text-slate-700">
-            <li><strong>方案 A（增加投資）：</strong>扣除每月被動收入 NT$ ${retirePassiveIncome.toLocaleString()} 後，建議每月可額外增加約 <span class="font-bold text-indigo-600">NT$ ${addMonthlyInvestNeeded.toLocaleString()}</span> 的定期定額投入（以年報酬 6% 估算）。</li>
-            <li><strong>方案 B（調整配置）：</strong>提高「股票/個股」或「基金/ETF」投入比重，提高整體年化報酬率。</li>
-            <li><strong>方案 C（延後退休或二次就業）：</strong>延長工作累積期，或規劃退休後兼職增加工作薪資收入。</li>
+            <li><strong>方案 A（增加定期定額）：</strong>扣除月退金後，建議每月可額外增加約 <span class="font-bold text-indigo-600">NT$ ${addMonthlyInvestNeeded.toLocaleString()}</span> 的投資（以年報酬 6% 估算）。</li>
+            <li><strong>方案 B（調整配置比重）：</strong>提高「股票/個股」或「基金/ETF」比例，拉高整體年化報酬率以補足缺口。</li>
+            <li><strong>方案 C（退休後兼職/續工作）：</strong>可在「工作薪水」欄位加上退休後的兼職收入，試算其對補足現金流缺口的效果。</li>
           </ul>
         `;
       }
