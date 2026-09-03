@@ -505,7 +505,6 @@
       const adviceBlock = document.getElementById('adviceBlock');
 
       if (gapAmount <= 0) {
-        // 達標狀況
         gapBadge.innerText = '🎉 完美達標！';
         gapBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
         gapAmountVal.innerText = '超額達標 NT$ ' + Math.abs(gapAmount).toLocaleString();
@@ -517,19 +516,16 @@
           <p>您目前的規劃已經能順利達成理想的退休生活目標！可以保持現有的累積步調，或考慮適度放寬生活預算。</p>
         `;
       } else {
-        // 未達標/存在缺口
         gapBadge.innerText = '⚠️ 存在缺口';
         gapBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300';
         gapAmountVal.innerText = '尚缺 NT$ ' + gapAmount.toLocaleString();
         gapAmountVal.className = 'font-bold text-rose-600 text-sm';
 
-        // 試算建議：如果提高定期定額需要增加多少錢（假設投在基金/ETF 6% 複利）
         const yearsToRetire = totalYears;
         let addMonthlyInvestNeeded = 0;
         if (yearsToRetire > 0) {
-          const r = rateFund; // 預設用基金年報酬算
+          const r = rateFund;
           const n = yearsToRetire * 12;
-          // FV = P * (((1+r)^n - 1) / r)  =>  P = FV * r / (((1+r)^n) - 1)
           if (r > 0) {
             addMonthlyInvestNeeded = Math.round((gapAmount * r) / (Math.pow(1 + r, n) - 1));
           } else {
